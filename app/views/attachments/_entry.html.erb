@@ -1,0 +1,44 @@
+<% attachment ||= nil %>
+<% position ||= 0 %>
+<% fields ||= { :active => "Active", :name => "Name", :description => "Description", :description_class => "small", :url => nil } %>
+<% if attachment.nil? || attachment.id.nil? %>
+  <% attachment_base_id = position %>
+  <% attachment_field_id = "new_#{position}" %>
+<% else %>
+  <% attachment_base_id = attachment.id %>
+  <% attachment_field_id = "existing_#{attachment.id}" %>
+<% end %>
+<li id="attachment_<%= attachment_base_id %>">
+  <% fields_for "attachment_info_#{attachment_field_id}", attachment do |aform| %>
+    <% if fields[:active].nil? %>
+      <%= aform.hidden_field :active %>
+    <% end %>
+    <table>
+      <% if attachment && (!attachment.id.nil?) %>
+        <tr><th>Delete?</th><td><%= check_box_tag "deletions[]", attachment.id %></td></tr>
+      <% end %>
+      <% unless fields[:active].nil? %>        
+        <tr><th><%= fields[:active] %></th><td><%= aform.check_box :active %></td></tr>
+      <% end %>
+      <% unless fields[:name].nil? %>
+        <tr><th><%= fields[:name] %></th><td><%= aform.text_field :name %></td></tr>
+      <% end %>
+      <% unless fields[:url].nil? %>
+        <tr><th><%= fields[:url] %></th><td><%= aform.text_field :url %></td></tr>
+      <% end %>
+      <% unless fields[:description].nil? %>
+        <tr><th><%= fields[:description] %></th><td><%= aform.text_area :description, :class => fields[:description_class] %></td></tr>
+      <% end %>
+      <tr>
+        <th><%= fields[:image] || "Item" %></th>
+        <td><%= aform.file_field :uploaded_data %></td> 
+        <td>
+          <% if (!attachment.nil?) && (!attachment.id.nil?) %>
+            <%= link_to (attachment.content_type[0..5] == "image/" ? image_tag(autosize(attachment.public_filename, :maxwidth => 50, :maxheight => 50), :alt => "View") : "View"), attachment.public_filename, :popup => true %>
+          <% end %>
+        </td>
+      </tr>
+    </table>
+    <br /><br /><hr /><br />
+  <% end %>
+</li>

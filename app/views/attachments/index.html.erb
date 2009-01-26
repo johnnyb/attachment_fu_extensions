@@ -1,0 +1,25 @@
+<h2><%= @title %></h2>
+
+<% form_tag({ :action => "update", :object_id => @primary, :object_type => @primary.class, :relationship => @relationship, :title => @title }, :multipart => true) do %>
+  <% minimum_entries ||= 10 %>
+  <% relationship_entries = @primary.send(@relationship) %>
+  <% unless relationship_entries.blank? %>
+    <h3>Existing Items</h3>
+    <ul class="acts_as_div" id="attachment_list">
+      <% relationship_entries.each do |attachment| %>
+        <%= render :partial => "entry", :locals => { :attachment => attachment, :fields => @fields } %>
+      <% end %>
+    </ul>
+    <%= sortable_element("attachment_list", :url => { :action => "attachment_order", :object_id => @primary, :object_type => @primary.class, :relationship => @relationship, :title => @title } ) %>
+  <% end %>
+
+  <h3>New Items</h3>
+  <ul class="acts_as_div" id="new_attachment_list">
+    <% num_new_entries = relationship_entries.size >= minimum_entries ? 1 : minimum_entries - relationship_entries.size %>
+    <% 1.upto(num_new_entries) do |entry_num| %>
+      <%= render :partial => "entry", :locals => { :position => entry_num, :fields => @fields, :attachment => Attachment.new } %>
+    <% end %>
+  </ul>
+  <%= @fields.map {|key, val| hidden_field_tag key, val }.join("\n") %>
+  <%= submit_tag "Save" %>
+<% end %>
