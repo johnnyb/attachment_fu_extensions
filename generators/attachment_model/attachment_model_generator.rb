@@ -8,6 +8,7 @@ class AttachmentModelGenerator < Rails::Generator::Base
       end
 
       m.migration_template "../../../db/migrate/001_create_attachments.rb", "db/migrate", :migration_file_name => "create_attachments"
+      m.route_resources :attachments
     end
   end
 end

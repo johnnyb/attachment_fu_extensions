@@ -6,7 +6,7 @@ class CreateAttachments < ActiveRecord::Migration
 
       # Extra content
       t.text :description
-      t.extra_info :text
+      t.text :extra_info 
       t.text :link_url
 
       # Relationship
@@ -22,10 +22,10 @@ class CreateAttachments < ActiveRecord::Migration
       t.integer :attachable_id
       t.string :attachable_type
       t.string :relationship
-      t.position :integer
+      t.integer :position 
 
       #Active/inactive
-      t.active :boolean
+      t.boolean :active
     end
   end
 

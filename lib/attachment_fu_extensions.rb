@@ -1,7 +1,7 @@
 module AttachmentFuExtensions
   module ClassMethods
     # Define an attachment using the Attachment class
-    def self.has_one_attachment(relationship)
+    def has_one_attachment(relationship)
       has_one relationship, :as => :attachable, :class_name => "Attachment", :conditions => "relationship = '#{relationship}'", :dependent => :destroy
       define_method("attach_#{relationship}") do |file_field|
         #FIXME - find a way to delete the old file!!!!
@@ -18,7 +18,7 @@ module AttachmentFuExtensions
     end
 
     # Define a set of attachments using the Attachment class
-    def self.has_many_attachments(relationship)
+    def has_many_attachments(relationship)
       has_many relationship, :as => :attachable, :class_name => "Attachment", :conditions => "relationship = '#{relationship}'", :dependent => :destroy, :order => "attachments.position, attachments.id"
       define_method("add_#{relationship}_attachment") do |file_field, position|
         if file_field.size > 0
@@ -66,6 +66,13 @@ module AttachmentFuExtensions
 end
 
 module AttachmentFuExtensionsHelper
+
+  # Get a link for the attachments admin interface
+  def attachments_for_path(obj, relationship, opts = {})
+    full_opts = opts.merge(:object_id => obj, :object_type => obj.class.name, :relationship => relationship.to_s)
+    return attachments_path(full_opts)
+  end
+
   #Options for autosize
   # :width => force an exact width
   # :height => force an exact height
