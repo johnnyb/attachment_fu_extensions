@@ -7,6 +7,9 @@ class Attachment < ActiveRecord::Base
 
   validates_as_attachment
 
+  named_scope :active, :conditions => { :active => true }
+  named_scope :inactive, :conditions => { :active => false }
+
   acts_as_list :scope => 'attachable_id = #{attachable_id} and relationship = \'#{relationship}\''
 
   def dup

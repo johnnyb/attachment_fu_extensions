@@ -73,6 +73,11 @@ module AttachmentFuExtensionsHelper
     return attachments_path(full_opts)
   end
 
+  def attachment_for_path(obj, relationship, opts = {})
+    full_opts = opts.merge(:object_id => obj, :object_type => obj.class.name, :relationship => relationship.to_s, :model => :single)
+    return attachments_path(full_opts)
+  end
+
   #Options for autosize
   # :width => force an exact width
   # :height => force an exact height
