@@ -42,30 +42,54 @@ class AttachmentsController < ApplicationController
   end
   
   def update
-    params.each do |key, val|
-      key = key.to_s
-      if key[0..15] == "attachment_info_"
-        if key[16..18] == "new"
-          if val[:uploaded_data].size > 0
-            position = key[20..-1].to_i + @primary.send("#{@relationship}").size
-            attachment = @primary.send("create_#{@relationship}_attachment", val)
-            attachment.position = position
-            attachment.save
+    if params[:mode] == "single"
+      params[:deletions].each do |attachment_id|
+        att = @primary.send(@relationship)
+        unless att.nil?
+          if att.id == attachment_id
+            @primary.send("#{@relationship}=", nil)
+            att.destroy
           end
-        else
-          id = key[25..-1].to_i
-          attachment = @primary.send("update_#{@relationship}_attachment", id, val)          
+        end
+      end
+      params.each do |key, val|
+        if key[0..15] == "attachment_info_"
+          if key[16..18] != "new" || val[:uploaded_data].size > 0
+            att = @primary.send(@relationship)
+            if att.nil?
+              @primary.send("create_#{@relationship}!", val)
+            else
+              att.update_attributes!(val)
+            end
+          end
+        end
+      end
+    else
+      params.each do |key, val|
+        key = key.to_s
+        if key[0..15] == "attachment_info_"
+          if key[16..18] == "new"
+            if val[:uploaded_data].size > 0
+              position = key[20..-1].to_i + @primary.send("#{@relationship}").size
+              attachment = @primary.send("create_#{@relationship}_attachment", val)
+              attachment.position = position
+              attachment.save
+            end
+          else
+            id = key[25..-1].to_i
+            attachment = @primary.send("update_#{@relationship}_attachment", id, val)          
+          end
+        end
+      end
+    
+      unless params[:deletions].blank?
+        params[:deletions].each do |attachment_id|
+          @primary.send(@relationship).find(attachment_id).destroy
         end
       end
     end
-    
-    unless params[:deletions].blank?
-      params[:deletions].each do |attachment_id|
-        @primary.send(@relationship).find(attachment_id).destroy
-      end
-    end
 
-    redirect_to attachments_path(static_params_hash)
+    redirect_to attachments_path(@static_params_hash)
   end
 
   # NOTE - this is not "show" because we aren't showing the whole record
