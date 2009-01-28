@@ -74,7 +74,7 @@ module AttachmentFuExtensionsHelper
   end
 
   def attachment_for_path(obj, relationship, opts = {})
-    full_opts = opts.merge(:object_id => obj, :object_type => obj.class.name, :relationship => relationship.to_s, :model => :single)
+    full_opts = opts.merge(:object_id => obj, :object_type => obj.class.name, :relationship => relationship.to_s, :mode => :single)
     return attachments_path(full_opts)
   end
 

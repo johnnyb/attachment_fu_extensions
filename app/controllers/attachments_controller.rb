@@ -31,7 +31,7 @@ class AttachmentsController < ApplicationController
           end
         end
         if @fields.empty?
-          if params[:mode] == :single
+          if params[:mode] == "single"
             @fields = {}
           else
             @fields = { :active => "Active", :name => "Name", :description => "Description", :description_class => "small" }
@@ -43,7 +43,7 @@ class AttachmentsController < ApplicationController
   
   def update
     if params[:mode] == "single"
-      params[:deletions].each do |attachment_id|
+      (params[:deletions] || []).each do |attachment_id|
         att = @primary.send(@relationship)
         unless att.nil?
           if att.id == attachment_id
@@ -57,14 +57,17 @@ class AttachmentsController < ApplicationController
           if key[16..18] != "new" || val[:uploaded_data].size > 0
             att = @primary.send(@relationship)
             if att.nil?
-              @primary.send("create_#{@relationship}!", val)
+              res = @primary.send("create_#{@relationship}", val.merge(:relationship => @relationship.to_s))
+              if res == false
+                raise "res is false!"
+              end
             else
               att.update_attributes!(val)
             end
           end
         end
       end
-    else
+    else #NON-SINGLE MODE
       params.each do |key, val|
         key = key.to_s
         if key[0..15] == "attachment_info_"
@@ -93,9 +96,10 @@ class AttachmentsController < ApplicationController
   end
 
   # NOTE - this is not "show" because we aren't showing the whole record
+  # FIXME - need to modify for AWS usage
   def view
     # FIXME - need a way to distinguish between download and inline docs
-    send_file(@attachment.filename)
+    send_file(@attachment.full_filename)
   end
 
   def attachment_order

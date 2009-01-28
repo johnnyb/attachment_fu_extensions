@@ -1,5 +1,4 @@
 <%
-  if params[:mode] == "single"
   maximum_entries = (params[:mode] == "single") ? 1 : nil
 %>
 <h2><%= @title %></h2>
@@ -28,11 +27,17 @@
     <% end %>
   <% end %>
 
-  <% if maximum_entries.nil? || maximum_entries > 1 %>
+  <% if maximum_entries.nil? || maximum_entries >= 1 %>
     <h3>New Items</h3>
     <ul class="acts_as_div" id="new_attachment_list">
-      <% num_new_entries = relationship_entries.size >= minimum_entries ? 1 : minimum_entries - relationship_entries.size %>
-      <% num_new_entries = maximum_entries if !(maximum_entries.nil?) && maximum_entries < num_new_entries %>
+      <%
+	 if params[:mode] == "single"
+	   num_new_entries = 1
+	 else
+	   num_new_entries = relationship_entries.size >= minimum_entries ? 1 : minimum_entries - relationship_entries.size
+         end
+         num_new_entries = maximum_entries if !(maximum_entries.nil?) && maximum_entries < num_new_entries
+      %>
       <% 1.upto(num_new_entries) do |entry_num| %>
         <%= render :partial => "entry", :locals => { :position => entry_num, :fields => @fields, :attachment => Attachment.new, :mode => params[:mode] } %>
       <% end %>
