@@ -72,7 +72,7 @@ class AttachmentsController < ApplicationController
         key = key.to_s
         if key[0..15] == "attachment_info_"
           if key[16..18] == "new"
-            if val[:uploaded_data].size > 0
+            if (!val[:uploaded_data].blank?) && val[:uploaded_data].size > 0
               position = key[20..-1].to_i + @primary.send("#{@relationship}").size
               attachment = @primary.send("create_#{@relationship}_attachment", val)
               attachment.position = position

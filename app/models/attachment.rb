@@ -7,6 +7,8 @@ class Attachment < ActiveRecord::Base
 
   validates_as_attachment
 
+  attr_accessible :uploaded_data, :active, :name, :description, :relationship, :position
+
   named_scope :active, :conditions => { :active => true }
   named_scope :inactive, :conditions => { :active => false }
 
