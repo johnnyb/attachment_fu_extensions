@@ -1,18 +1,25 @@
 class Attachment < ActiveRecord::Base
   belongs_to :attachable, :polymorphic => true
 
+  acts_as_list :scope => 'attachable_id = #{attachable_id} and relationship = \'#{relationship}\''
+
   has_attachment :max_size => 25000000,
                  :storage => :file_system,
                  :path_prefix => "public/images/data/attachments"
 
   validates_as_attachment
 
-  attr_accessible :uploaded_data, :active, :name, :description, :relationship, :position
+  attr_accessible :uploaded_data, :active, :name, :description, :relationship, :position, :url
 
   named_scope :active, :conditions => { :active => true }
   named_scope :inactive, :conditions => { :active => false }
 
-  acts_as_list :scope => 'attachable_id = #{attachable_id} and relationship = \'#{relationship}\''
+  default_scope :order => 'attachments.position'
+
+
+  %w{ image audio video }.each do |type|
+    named_scope type.pluralize, :conditions => ["attachments.content_type like ?", "#{type}/%"]
+  end
 
   def dup
     new_attachment = Attachment.new
@@ -24,6 +31,11 @@ class Attachment < ActiveRecord::Base
     new_attachment.attachable_type = self.attachable_type
 
     return new_attachment
+  end
+
+  # pass in any base mime types, ex: is_mime_type?(:video)
+  def is_mime_type?(*args)
+    /^(#{args.join('|')})\//.match(content_type).nil?
   end
 
   # This was needed for an earlier version - not sure if needed now

@@ -18,8 +18,15 @@ module AttachmentFuExtensions
     end
 
     # Define a set of attachments using the Attachment class
-    def has_many_attachments(relationship)
-      has_many relationship, :as => :attachable, :class_name => "Attachment", :conditions => "relationship = '#{relationship}'", :dependent => :destroy, :order => "attachments.position, attachments.id"
+    def has_many_attachments(relationship, options = {})
+      has_many relationship, :as => :attachable, :class_name => "Attachment", :conditions => "relationship = '#{relationship}'", :dependent => :destroy, :order => "attachments.position, attachments.id", :extend => Reorderable
+
+      if marks = options.delete(:marks)
+        marks.each do |mark|
+          belongs_to :"#{mark}_#{relationship.to_s.singularize}", :class_name => "Attachment"
+        end
+      end
+
       define_method("add_#{relationship}_attachment") do |file_field, position|
         if file_field.size > 0
           attach_info = {:uploaded_data => file_field, :relationship => relationship.to_s}
