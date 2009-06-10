@@ -7,6 +7,8 @@ class Attachment < ActiveRecord::Base
                  :storage => :file_system,
                  :path_prefix => "public/images/data/attachments"
 
+  before_validation :force_content_type
+
   validates_as_attachment
 
   attr_accessible :uploaded_data, :active, :name, :description, :relationship, :position, :url
@@ -36,6 +38,12 @@ class Attachment < ActiveRecord::Base
   # pass in any base mime types, ex: is_mime_type?(:video)
   def is_mime_type?(*args)
     /^(#{args.join('|')})\//.match(content_type).nil?
+  end
+
+  def force_content_type
+    if content_type.blank?
+      self.content_type = 'application/octet-stream'
+    end
   end
 
   # This was needed for an earlier version - not sure if needed now
