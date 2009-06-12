@@ -19,9 +19,19 @@ class Attachment < ActiveRecord::Base
   default_scope :order => 'attachments.position'
 
 
-  %w{ image audio video }.each do |type|
+  %w{ image audio video text pdf }.each do |type|
     named_scope type.pluralize, :conditions => ["attachments.content_type like ?", "#{type}/%"]
   end
+
+  named_scope :of_media_type, lambda{|tlist|
+    condition_list = []
+    value_list = []
+    tlist.each do |ctype|
+      condition_list.push("attachments.content_type like ?")
+      value_list.push("#{ctype}/%")
+    end
+    return { :conditions => [condition_list.join(" OR "), *value_list] }
+  }
 
   def dup
     new_attachment = Attachment.new
@@ -37,7 +47,7 @@ class Attachment < ActiveRecord::Base
 
   # pass in any base mime types, ex: is_mime_type?(:video)
   def is_mime_type?(*args)
-    /^(#{args.join('|')})\//.match(content_type).nil?
+    return !(/^(#{args.join('|')})\//.match(content_type).nil?)
   end
 
   def force_content_type

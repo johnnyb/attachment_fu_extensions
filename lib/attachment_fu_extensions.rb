@@ -125,12 +125,9 @@ module AttachmentFuExtensionsHelper
     unless File.exists?(img_fixed_priv_path)
       if(File.exists?(img_priv_path))
         begin
-          geom = Magick::Geometry.new(opts[:maxwidth], opts[:maxheight])
-          img = Magick::Image.read(img_priv_path).first
-          altered = img.change_geometry(geom) do |w, h, img|
-            img.resize(w, h)
-          end
-          altered.write img_fixed_priv_path
+          img = MiniMagick::Image.from_file(img_priv_path)
+          img.resize "#{opts[:maxwidth]}x#{opts[:maxheight]}"
+          img.write img_fixed_priv_path
         rescue
           logger.error("Error writing image auto-resize: #{img_fixed_priv_path}: #{$!}")
         end
