@@ -1,8 +1,6 @@
 class Attachment < ActiveRecord::Base
   belongs_to :attachable, :polymorphic => true
 
-  acts_as_list :scope => 'attachable_id = #{attachable_id} and relationship = \'#{relationship}\''
-
   has_attachment :max_size => 25000000,
                  :storage => :file_system,
                  :path_prefix => "public/images/data/attachments"
@@ -16,7 +14,7 @@ class Attachment < ActiveRecord::Base
   named_scope :active, :conditions => { :active => true }
   named_scope :inactive, :conditions => { :active => false }
 
-  default_scope :order => 'attachments.position'
+  default_scope :order => 'attachments.position, attachments.id'
 
 
   %w{ image audio video text pdf }.each do |type|
@@ -55,6 +53,17 @@ class Attachment < ActiveRecord::Base
       self.content_type = 'application/octet-stream'
     end
   end
+
+	# Options:
+	#  :width
+	#  :height
+	def autothumb(opts = {})
+		thumb_key = "mxw#{opts[:width] || "a"}_mxh#{opts[:height] || "a"}"
+		temp_file = temp_path || create_temp_file
+
+		#NOTE - this only works if the width is specified, though it usually is
+		create_or_update_thumbnail(temp_file, thumb_key, opts[:width], opts[:height])
+	end
 
   # This was needed for an earlier version - not sure if needed now
   # def thumbnails
