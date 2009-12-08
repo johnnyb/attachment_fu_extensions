@@ -21,6 +21,8 @@ class Attachment < ActiveRecord::Base
     named_scope type.pluralize, :conditions => ["attachments.content_type like ?", "#{type}/%"]
   end
 
+  named_scope :documents, :conditions => ["pdf", "excel", "word"].map{|dt| "attachments.content_type #{ilike_keyword} '%#{dt}%'"}.join(" OR ")
+
   named_scope :of_media_type, lambda{|tlist|
     condition_list = []
     value_list = []
@@ -53,17 +55,6 @@ class Attachment < ActiveRecord::Base
       self.content_type = 'application/octet-stream'
     end
   end
-
-	# Options:
-	#  :width
-	#  :height
-	def autothumb(opts = {})
-		thumb_key = "mxw#{opts[:width] || "a"}_mxh#{opts[:height] || "a"}"
-		temp_file = temp_path || create_temp_file
-
-		#NOTE - this only works if the width is specified, though it usually is
-		create_or_update_thumbnail(temp_file, thumb_key, opts[:width], opts[:height])
-	end
 
   # This was needed for an earlier version - not sure if needed now
   # def thumbnails
