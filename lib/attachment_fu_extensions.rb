@@ -3,6 +3,15 @@ module AttachmentFuExtensions
     # Define an attachment using the Attachment class
     def has_one_attachment(relationship)
       has_one relationship, :as => :attachable, :class_name => "Attachment", :conditions => "relationship = '#{relationship}'", :dependent => :destroy
+
+      define_method("#{relationship}_attachment=") do |file_field|
+         send("attach_#{relationship}", file_field)
+      end
+
+      define_method("#{relationship}_attachment") do 
+         send(relationship)
+      end
+
       define_method("attach_#{relationship}") do |file_field|
         #FIXME - find a way to delete the old file!!!!
 
