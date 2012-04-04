@@ -37,7 +37,7 @@ class Attachment < ActiveRecord::Base
     new_attachment = Attachment.new
     new_attachment.content_type = self.content_type
     new_attachment.filename = self.filename
-    new_attachment.temp_path = "public#{self.public_filename}"
+    new_attachment.temp_paths.unshift("public#{self.public_filename}")
     new_attachment.relationship = self.relationship
     new_attachment.attachable_id = self.attachable_id
     new_attachment.attachable_type = self.attachable_type
